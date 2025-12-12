@@ -120,9 +120,9 @@ export default function AdminPage() {
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-primary">PneuxExpress - Administration</h1>
+                <h1 className="text-primary text-4xl font-bold">PneuxExpress</h1>
                 <p className="text-muted-foreground mt-1">
-                  Gestion des rendez-vous
+                  Gestion des rendez-vous - Administration
                 </p>
               </div>
               <div className="flex gap-2">
