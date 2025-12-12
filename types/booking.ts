@@ -1,11 +1,22 @@
+export interface Customer {
+  id: string;
+  created_at: string;
+  nom: string;
+  courriel: string;
+}
+
 export interface Appointment {
   id: string;
-  date: string; // YYYY-MM-DD format
-  time: string; // HH:00 format (8-15)
-  customerName: string;
-  customerEmail: string;
-  carBrand: string;
-  createdAt: string;
+  created_at: string;
+  date: string;
+  time: string;
+  id_customer: string;
+  car_brand: string;
+  customer?: Customer;
+}
+
+export interface AppointmentWithCustomer extends Appointment {
+  customer: Customer;
 }
 
 export interface TimeSlot {

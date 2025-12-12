@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { AppointmentWithCustomer } from '@/types/booking';
-import { loadAppointments, createCustomer, createAppointment } from '@/lib/bookingUtils';
-import { CustomerView } from '@/composants/CustomerView';
+import { loadAppointments, createCustomer, createAppointment, updateAppointment, deleteAppointment } from '@/lib/bookingUtils';
+import { AdminDashboard } from '@/composants/AdminDashboard';
 import { Button } from '@/components/ui/button';
-import { WrenchIcon, HomeIcon } from 'lucide-react';
+import { HomeIcon, WrenchIcon } from 'lucide-react';
 import Link from 'next/link';
 
-export default function App() {
+export default function AdminPage() {
   const [appointments, setAppointments] = useState<AppointmentWithCustomer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,6 +54,57 @@ export default function App() {
     await loadData();
   };
 
+  const handleUpdateAppointment = async (
+    id: string,
+    data: {
+      date: string;
+      time: string;
+      customerName: string;
+      customerEmail: string;
+      carBrand: string;
+    }
+  ) => {
+    // Create or get customer
+    const customer = await createCustomer(data.customerName, data.customerEmail);
+    if (!customer) {
+      alert('Erreur lors de la mise à jour du client');
+      return;
+    }
+
+    // Update appointment
+    const success = await updateAppointment(
+      id,
+      data.date,
+      data.time,
+      customer.id,
+      data.carBrand
+    );
+
+    if (!success) {
+      alert('Erreur lors de la mise à jour du rendez-vous');
+      return;
+    }
+
+    // Reload appointments
+    await loadData();
+  };
+
+  const handleDeleteAppointment = async (id: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce rendez-vous ?')) {
+      return;
+    }
+
+    const success = await deleteAppointment(id);
+
+    if (!success) {
+      alert('Erreur lors de la suppression du rendez-vous');
+      return;
+    }
+
+    // Reload appointments
+    await loadData();
+  };
+
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -61,9 +112,9 @@ export default function App() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-primary">PneuxExpress</h1>
+              <h1 className="text-primary">PneuxExpress - Administration</h1>
               <p className="text-muted-foreground mt-1">
-                Centre automobile - Changement de pneus
+                Gestion des rendez-vous
               </p>
             </div>
             <div className="flex gap-2">
@@ -86,32 +137,17 @@ export default function App() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 text-center max-w-2xl mx-auto">
-          <h2 className="mb-2">Réservez votre changement de pneus</h2>
-          <p className="text-muted-foreground">
-            Choisissez une date et une heure qui vous conviennent. Notre équipe vous accueillera
-            du lundi au vendredi de 8h00 à 16h00.
-          </p>
-        </div>
         {loading ? (
           <div className="text-center py-12">Chargement...</div>
         ) : (
-          <CustomerView
+          <AdminDashboard
             appointments={appointments}
-            onBooking={handleAddAppointment}
+            onAdd={handleAddAppointment}
+            onUpdate={handleUpdateAppointment}
+            onDelete={handleDeleteAppointment}
           />
         )}
       </main>
-
-      {/* Footer */}
-      <footer className="border-t bg-card mt-16">
-        <div className="container mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
-          <p>
-            Horaires : Lundi au Vendredi, 8h00 - 16h00 • Rendez-vous de 60 minutes • Maximum 3
-            véhicules par créneau
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

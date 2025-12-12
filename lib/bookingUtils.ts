@@ -1,37 +1,148 @@
-import { Appointment, TimeSlot } from '../types/booking';
+import { supabase } from '@/lib/supabaseClient';
+import { Appointment, Customer, AppointmentWithCustomer } from '@/types/booking';
 
-const WORK_HOURS = [8, 9, 10, 11, 12, 13, 14, 15]; // 8h-16h (last slot at 15h)
-const MAX_APPOINTMENTS_PER_SLOT = 3;
+export async function loadAppointments(): Promise<AppointmentWithCustomer[]> {
+  try {
+    const { data, error } = await supabase
+      .from('appointment')
+      .select(`
+        *,
+        customer (*)
+      `)
+      .order('date', { ascending: true })
+      .order('time', { ascending: true });
 
-export function getAvailableTimeSlots(date: string, appointments: Appointment[]): TimeSlot[] {
-  // Filter appointments for the selected date
-  const dayAppointments = appointments.filter(apt => apt.date === date);
-  
-  // Get current date and time for comparison
-  const now = new Date();
-  const today = formatDate(now);
-  const currentHour = now.getHours();
-  const currentMinutes = now.getMinutes();
-  
-  return WORK_HOURS.map(hour => {
-    const timeStr = `${hour.toString().padStart(2, '0')}:00`;
-    const count = dayAppointments.filter(apt => apt.time === timeStr).length;
-    
-    // Check if this time slot has passed (for today only)
-    let isPast = false;
-    if (date === today) {
-      // A slot is in the past if:
-      // - The slot hour is less than current hour, OR
-      // - The slot hour equals current hour (since slots are 60min, we're already in that slot)
-      isPast = hour <= currentHour;
+    if (error) {
+      console.error('Error loading appointments:', error);
+      return [];
     }
-    
-    return {
-      time: timeStr,
-      available: !isPast && count < MAX_APPOINTMENTS_PER_SLOT,
-      count
-    };
-  });
+
+    return data as AppointmentWithCustomer[];
+  } catch (error) {
+    console.error('Error loading appointments:', error);
+    return [];
+  }
+}
+
+export async function createCustomer(nom: string, courriel: string): Promise<Customer | null> {
+  try {
+    // Check if customer already exists
+    const { data: existingCustomer } = await supabase
+      .from('customer')
+      .select('*')
+      .eq('courriel', courriel)
+      .single();
+
+    if (existingCustomer) {
+      return existingCustomer as Customer;
+    }
+
+    // Create new customer
+    const { data, error } = await supabase
+      .from('customer')
+      .insert({ nom, courriel })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating customer:', error);
+      return null;
+    }
+
+    return data as Customer;
+  } catch (error) {
+    console.error('Error creating customer:', error);
+    return null;
+  }
+}
+
+export async function createAppointment(
+  date: string,
+  time: string,
+  id_customer: string,
+  car_brand: string
+): Promise<Appointment | null> {
+  try {
+    const { data, error } = await supabase
+      .from('appointment')
+      .insert({ date, time, id_customer, car_brand })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating appointment:', error);
+      return null;
+    }
+
+    return data as Appointment;
+  } catch (error) {
+    console.error('Error creating appointment:', error);
+    return null;
+  }
+}
+
+export async function updateAppointment(
+  id: string,
+  date: string,
+  time: string,
+  id_customer: string,
+  car_brand: string
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('appointment')
+      .update({ date, time, id_customer, car_brand })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating appointment:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error updating appointment:', error);
+    return false;
+  }
+}
+
+export async function deleteAppointment(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('appointment')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting appointment:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting appointment:', error);
+    return false;
+  }
+}
+
+export async function getAppointmentsByDateAndTime(date: string, time: string): Promise<number> {
+  try {
+    const { count, error } = await supabase
+      .from('appointment')
+      .select('*', { count: 'exact', head: true })
+      .eq('date', date)
+      .eq('time', time);
+
+    if (error) {
+      console.error('Error counting appointments:', error);
+      return 0;
+    }
+
+    return count || 0;
+  } catch (error) {
+    console.error('Error counting appointments:', error);
+    return 0;
+  }
 }
 
 export function isWeekday(date: Date): boolean {
@@ -51,13 +162,4 @@ export function formatDisplayDate(dateStr: string): string {
     month: 'long', 
     day: 'numeric' 
   });
-}
-
-export function saveAppointments(appointments: Appointment[]): void {
-  localStorage.setItem('pneux-appointments', JSON.stringify(appointments));
-}
-
-export function loadAppointments(): Appointment[] {
-  const stored = localStorage.getItem('pneux-appointments');
-  return stored ? JSON.parse(stored) : [];
 }

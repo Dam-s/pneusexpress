@@ -1,68 +1,69 @@
 import { useState } from 'react';
-import { Appointment } from '../types/booking';
+import { AppointmentWithCustomer } from '@/types/booking';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { formatDisplayDate, isWeekday } from '../lib/bookingUtils';
-import { PlusIcon, EditIcon, Trash2Icon, CalendarIcon, ClockIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { PlusIcon, CalendarIcon, ClockIcon, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface AdminDashboardProps {
-  appointments: Appointment[];
-  onAdd: (appointment: Omit<Appointment, 'id' | 'createdAt'>) => void;
-  onUpdate: (id: string, appointment: Omit<Appointment, 'id' | 'createdAt'>) => void;
+  appointments: AppointmentWithCustomer[];
+  onAdd: (appointment: {
+    date: string;
+    time: string;
+    customerName: string;
+    customerEmail: string;
+    carBrand: string;
+  }) => void;
+  onUpdate: (id: string, appointment: {
+    date: string;
+    time: string;
+    customerName: string;
+    customerEmail: string;
+    carBrand: string;
+  }) => void;
   onDelete: (id: string) => void;
 }
 
 const WORK_HOURS = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
 
+function isWeekday(date: Date) {
+  const day = date.getDay();
+  return day !== 0 && day !== 6;
+}
+
+function formatDisplayDate(dateStr: string): string {
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+
 export function AdminDashboard({ appointments, onAdd, onUpdate, onDelete }: AdminDashboardProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
-  
-  // Sort appointments by date and time
-  const sortedAppointments = [...appointments].sort((a, b) => {
-    const dateCompare = a.date.localeCompare(b.date);
-    if (dateCompare !== 0) return dateCompare;
-    return a.time.localeCompare(b.time);
-  });
+  const [editingAppointment, setEditingAppointment] = useState<AppointmentWithCustomer | null>(null);
 
-  const handleAddSubmit = (data: Omit<Appointment, 'id' | 'createdAt'>) => {
+  const handleAddSubmit = (data: {
+    date: string;
+    time: string;
+    customerName: string;
+    customerEmail: string;
+    carBrand: string;
+  }) => {
     onAdd(data);
     setIsAddDialogOpen(false);
   };
 
-  const handleUpdateSubmit = (data: Omit<Appointment, 'id' | 'createdAt'>) => {
+  const handleUpdateSubmit = (data: {
+    date: string;
+    time: string;
+    customerName: string;
+    customerEmail: string;
+    carBrand: string;
+  }) => {
     if (editingAppointment) {
       onUpdate(editingAppointment.id, data);
       setEditingAppointment(null);
@@ -96,7 +97,7 @@ export function AdminDashboard({ appointments, onAdd, onUpdate, onDelete }: Admi
           </div>
         </CardHeader>
         <CardContent>
-          {sortedAppointments.length === 0 ? (
+          {appointments.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>Aucun rendez-vous planifié</p>
@@ -115,13 +116,13 @@ export function AdminDashboard({ appointments, onAdd, onUpdate, onDelete }: Admi
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedAppointments.map((appointment) => (
+                  {appointments.map((appointment) => (
                     <TableRow key={appointment.id}>
                       <TableCell>{formatDisplayDate(appointment.date)}</TableCell>
                       <TableCell>{appointment.time}</TableCell>
-                      <TableCell>{appointment.customerName}</TableCell>
-                      <TableCell>{appointment.customerEmail}</TableCell>
-                      <TableCell>{appointment.carBrand}</TableCell>
+                      <TableCell>{appointment.customer.nom}</TableCell>
+                      <TableCell>{appointment.customer.courriel}</TableCell>
+                      <TableCell>{appointment.car_brand}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-2 justify-end">
                           <Dialog
@@ -136,14 +137,14 @@ export function AdminDashboard({ appointments, onAdd, onUpdate, onDelete }: Admi
                                 size="sm"
                                 onClick={() => setEditingAppointment(appointment)}
                               >
-                                <EditIcon className="h-4 w-4" />
+                                <Pencil className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
                             <DialogContent>
                               <DialogHeader>
                                 <DialogTitle>Modifier le rendez-vous</DialogTitle>
                                 <DialogDescription>
-                                  Mettre à jour les informations du rendez-vous
+                                  Modifier les détails du rendez-vous
                                 </DialogDescription>
                               </DialogHeader>
                               <AppointmentForm
@@ -153,31 +154,13 @@ export function AdminDashboard({ appointments, onAdd, onUpdate, onDelete }: Admi
                             </DialogContent>
                           </Dialog>
 
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Trash2Icon className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Supprimer le rendez-vous</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Êtes-vous sûr de vouloir supprimer ce rendez-vous ? Cette action
-                                  est irréversible.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => onDelete(appointment.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Supprimer
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onDelete(appointment.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -193,8 +176,14 @@ export function AdminDashboard({ appointments, onAdd, onUpdate, onDelete }: Admi
 }
 
 interface AppointmentFormProps {
-  onSubmit: (data: Omit<Appointment, 'id' | 'createdAt'>) => void;
-  initialData?: Appointment;
+  onSubmit: (data: {
+    date: string;
+    time: string;
+    customerName: string;
+    customerEmail: string;
+    carBrand: string;
+  }) => void;
+  initialData?: AppointmentWithCustomer;
 }
 
 function AppointmentForm({ onSubmit, initialData }: AppointmentFormProps) {
@@ -202,9 +191,9 @@ function AppointmentForm({ onSubmit, initialData }: AppointmentFormProps) {
     initialData ? new Date(initialData.date + 'T12:00:00') : undefined
   );
   const [time, setTime] = useState(initialData?.time || '');
-  const [name, setName] = useState(initialData?.customerName || '');
-  const [email, setEmail] = useState(initialData?.customerEmail || '');
-  const [carBrand, setCarBrand] = useState(initialData?.carBrand || '');
+  const [name, setName] = useState(initialData?.customer.nom || '');
+  const [email, setEmail] = useState(initialData?.customer.courriel || '');
+  const [carBrand, setCarBrand] = useState(initialData?.car_brand || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -233,7 +222,7 @@ function AppointmentForm({ onSubmit, initialData }: AppointmentFormProps) {
               className="w-full justify-start"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, 'PPP', { locale: undefined }) : 'Sélectionner une date'}
+              {date ? format(date, 'PPP') : 'Sélectionner une date'}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -259,7 +248,7 @@ function AppointmentForm({ onSubmit, initialData }: AppointmentFormProps) {
             id="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full h-10 pl-10 pr-3 rounded-md border border-input bg-input-background text-foreground"
+            className="w-full h-10 pl-10 pr-3 rounded-md border border-input bg-background text-foreground"
           >
             <option value="">Sélectionner une heure</option>
             {WORK_HOURS.map((hour) => (
