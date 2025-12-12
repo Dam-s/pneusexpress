@@ -106,48 +106,57 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-primary">PneuxExpress - Administration</h1>
-              <p className="text-muted-foreground mt-1">
-                Gestion des rendez-vous
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Link href="/">
-                <Button variant="outline">
-                  <HomeIcon className="h-4 w-4 mr-2" />
-                  Accueil
-                </Button>
-              </Link>
-              <Link href="/admin">
-                <Button variant="outline">
-                  <WrenchIcon className="h-4 w-4 mr-2" />
-                  Administration
-                </Button>
-              </Link>
+    <div 
+      className="min-h-screen bg-cover bg-center bg-fixed"
+      style={{
+        backgroundImage: 'url(/background-garage-new.jpg)',
+        backgroundColor: '#f5f0e8'
+      }}
+    >
+      {/* Overlay pour améliorer la lisibilité */}
+      <div className="min-h-screen bg-white/80">
+        {/* Header */}
+        <header className="border-b bg-card/95">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-primary">PneuxExpress - Administration</h1>
+                <p className="text-muted-foreground mt-1">
+                  Gestion des rendez-vous
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Link href="/">
+                  <Button variant="outline">
+                    <HomeIcon className="h-4 w-4 mr-2" />
+                    Accueil
+                  </Button>
+                </Link>
+                <Link href="/admin">
+                  <Button variant="outline">
+                    <WrenchIcon className="h-4 w-4 mr-2" />
+                    Administration
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {loading ? (
-          <div className="text-center py-12">Chargement...</div>
-        ) : (
-          <AdminDashboard
-            appointments={appointments}
-            onAdd={handleAddAppointment}
-            onUpdate={handleUpdateAppointment}
-            onDelete={handleDeleteAppointment}
-          />
-        )}
-      </main>
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-8">
+          {loading ? (
+            <div className="text-center py-12">Chargement...</div>
+          ) : (
+            <AdminDashboard
+              appointments={appointments}
+              onAdd={handleAddAppointment}
+              onUpdate={handleUpdateAppointment}
+              onDelete={handleDeleteAppointment}
+            />
+          )}
+        </main>
+      </div>
     </div>
   );
 }
