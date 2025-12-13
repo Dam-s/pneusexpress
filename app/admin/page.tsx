@@ -2,12 +2,15 @@
 import { useState, useEffect } from 'react';
 import { AppointmentWithCustomer } from '@/types/booking';
 import { loadAppointments, createCustomer, createAppointment, updateAppointment, deleteAppointment, updateCustomer } from '@/lib/bookingUtils';
+// import { sendConfirmationEmail } from '@/lib/emailService';
+import { useAuth } from '@/lib/useAuth';
 import { AdminDashboard } from '@/composants/AdminDashboard';
 import { Button } from '@/components/ui/button';
-import { HomeIcon, WrenchIcon } from 'lucide-react';
+import { HomeIcon, WrenchIcon, LogOutIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminPage() {
+  const { user, loading: authLoading, signOut } = useAuth(true);
   const [appointments, setAppointments] = useState<AppointmentWithCustomer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,6 +25,18 @@ export default function AdminPage() {
     setAppointments(data);
     setLoading(false);
   };
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Vérification de l'authentification...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddAppointment = async (data: {
     date: string;
@@ -49,6 +64,19 @@ export default function AdminPage() {
       alert('Erreur lors de la création du rendez-vous');
       return;
     }
+
+    // Send confirmation email
+    await fetch("/api/send-confirmation", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: data.customerEmail,
+      name: data.customerName,
+      date: data.date,
+      time: data.time,
+      carBrand: data.carBrand,
+    }),
+  });
 
     // Reload appointments
     await loadData();
@@ -144,12 +172,10 @@ export default function AdminPage() {
                     Accueil
                   </Button>
                 </Link>
-                <Link href="/admin">
-                  <Button variant="outline">
-                    <WrenchIcon className="h-4 w-4 mr-2" />
-                    Administration
-                  </Button>
-                </Link>
+                <Button variant="outline" onClick={signOut}>
+                  <LogOutIcon className="h-4 w-4 mr-2" />
+                  Déconnexion
+                </Button>
               </div>
             </div>
           </div>
