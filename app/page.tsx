@@ -49,6 +49,19 @@ export default function App() {
       alert('Erreur lors de la création du rendez-vous');
       return;
     }
+    
+    // Send confirmation email
+    await fetch("/api/send-confirmation", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: data.customerEmail,
+      name: data.customerName,
+      date: data.date,
+      time: data.time,
+      carBrand: data.carBrand,
+    }),
+  });
 
     // Reload appointments
     await loadData();

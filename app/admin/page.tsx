@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { AppointmentWithCustomer } from '@/types/booking';
-import { loadAppointments, createCustomer, createAppointment, updateAppointment, deleteAppointment } from '@/lib/bookingUtils';
+import { loadAppointments, createCustomer, createAppointment, updateAppointment, deleteAppointment, updateCustomer } from '@/lib/bookingUtils';
 import { AdminDashboard } from '@/composants/AdminDashboard';
 import { Button } from '@/components/ui/button';
 import { HomeIcon, WrenchIcon } from 'lucide-react';
@@ -64,8 +64,20 @@ export default function AdminPage() {
       carBrand: string;
     }
   ) => {
-    // Create or get customer
-    const customer = await createCustomer(data.customerName, data.customerEmail);
+    // Find the current appointment to get customer ID
+    const currentAppointment = appointments.find(apt => apt.id === id);
+    if (!currentAppointment) {
+      alert('Rendez-vous introuvable');
+      return;
+    }
+
+    // Update customer information
+    const customer = await updateCustomer(
+      currentAppointment.id_customer,
+      data.customerName,
+      data.customerEmail
+    );
+    
     if (!customer) {
       alert('Erreur lors de la mise à jour du client');
       return;

@@ -56,6 +56,27 @@ export async function createCustomer(nom: string, courriel: string): Promise<Cus
   }
 }
 
+export async function updateCustomer(id: string, nom: string, courriel: string): Promise<Customer | null> {
+  try {
+    const { data, error } = await supabase
+      .from('customer')
+      .update({ nom, courriel })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating customer:', error);
+      return null;
+    }
+
+    return data as Customer;
+  } catch (error) {
+    console.error('Error in updateCustomer:', error);
+    return null;
+  }
+}
+
 export async function createAppointment(
   date: string,
   time: string,
