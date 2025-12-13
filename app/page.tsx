@@ -6,6 +6,7 @@ import { CustomerView } from '@/composants/CustomerView';
 import { Button } from '@/components/ui/button';
 import { WrenchIcon, HomeIcon } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function App() {
   const [appointments, setAppointments] = useState<AppointmentWithCustomer[]>([]);
@@ -81,11 +82,19 @@ export default function App() {
         <header className="border-b bg-card/95">
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-primary text-4xl font-bold">PneuxExpress</h1>
-                <p className="text-muted-foreground mt-1">
-                  Centre automobile - Changement de pneus
-                </p>
+              <div className="flex items-center gap-4">
+                <Image
+                  src="/logo-garages.jpg"
+                  alt="PneuxExpress Logo"
+                  width={50}
+                  height={50}
+                />
+                <div>
+                  <h1 className="text-primary text-2xl font-bold">PneuxExpress</h1>
+                  <p className="text-muted-foreground mt-1">
+                    Centre automobile - Changement de pneus
+                  </p>
+                </div>
               </div>
               <div className="flex gap-2">
                 <Link href="/">

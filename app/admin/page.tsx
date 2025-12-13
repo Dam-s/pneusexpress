@@ -8,6 +8,7 @@ import { AdminDashboard } from '@/composants/AdminDashboard';
 import { Button } from '@/components/ui/button';
 import { HomeIcon, WrenchIcon, LogOutIcon } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function AdminPage() {
   const { user, loading: authLoading, signOut } = useAuth(true);
@@ -159,11 +160,19 @@ export default function AdminPage() {
         <header className="border-b bg-card/95">
           <div className="container mx-auto px-4 py-6">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-primary text-4xl font-bold">PneuxExpress</h1>
-                <p className="text-muted-foreground mt-1">
-                  Gestion des rendez-vous - Administration
-                </p>
+              <div className="flex items-center gap-4">
+                <Image
+                  src="/logo-garages.jpg"
+                  alt="PneuxExpress Logo"
+                  width={50}
+                  height={50}
+                />
+                <div>
+                  <h1 className="text-primary text-2xl font-bold">PneuxExpress</h1>
+                  <p className="text-muted-foreground mt-1">
+                    Gestion des rendez-vous - Administration
+                  </p>
+                </div>
               </div>
               <div className="flex gap-2">
                 <Link href="/">
