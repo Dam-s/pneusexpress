@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { HomeIcon, LockIcon } from 'lucide-react';
+import { HomeIcon, LockIcon, InfoIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -55,11 +55,17 @@ export default function LoginPage() {
       <div className="min-h-screen bg-white/80 w-full flex items-center justify-center">
         <div className="w-full max-w-md p-4">
           {/* Header with Home Link */}
-          <div className="mb-8 text-center">
+          <div className="mb-8 text-center flex gap-2 justify-center">
             <Link href="/">
-              <Button variant="outline" className="mb-4">
+              <Button variant="outline">
                 <HomeIcon className="h-4 w-4 mr-2" />
                 Retour à l'accueil
+              </Button>
+            </Link>
+            <Link href="/apropos">
+              <Button variant="outline">
+                <InfoIcon className="h-4 w-4 mr-2" />
+                À propos
               </Button>
             </Link>
           </div>

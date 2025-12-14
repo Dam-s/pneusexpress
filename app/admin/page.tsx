@@ -6,7 +6,7 @@ import { loadAppointments, createCustomer, createAppointment, updateAppointment,
 import { useAuth } from '@/lib/useAuth';
 import { AdminDashboard } from '@/composants/AdminDashboard';
 import { Button } from '@/components/ui/button';
-import { HomeIcon, WrenchIcon, LogOutIcon } from 'lucide-react';
+import { HomeIcon, WrenchIcon, LogOutIcon, InfoIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -179,6 +179,12 @@ export default function AdminPage() {
                   <Button variant="outline">
                     <HomeIcon className="h-4 w-4 mr-2" />
                     Accueil
+                  </Button>
+                </Link>
+                <Link href="/apropos">
+                  <Button variant="outline">
+                    <InfoIcon className="h-4 w-4 mr-2" />
+                    À propos
                   </Button>
                 </Link>
                 <Button variant="outline" onClick={signOut}>

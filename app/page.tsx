@@ -4,7 +4,7 @@ import { AppointmentWithCustomer } from '@/types/booking';
 import { loadAppointments, createCustomer, createAppointment } from '@/lib/bookingUtils';
 import { CustomerView } from '@/composants/CustomerView';
 import { Button } from '@/components/ui/button';
-import { WrenchIcon, HomeIcon } from 'lucide-react';
+import { WrenchIcon, HomeIcon, InfoIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -101,6 +101,12 @@ export default function App() {
                   <Button variant="outline">
                     <HomeIcon className="h-4 w-4 mr-2" />
                     Accueil
+                  </Button>
+                </Link>
+                <Link href="/apropos">
+                  <Button variant="outline">
+                    <InfoIcon className="h-4 w-4 mr-2" />
+                    À propos
                   </Button>
                 </Link>
                 <Link href="/admin">
